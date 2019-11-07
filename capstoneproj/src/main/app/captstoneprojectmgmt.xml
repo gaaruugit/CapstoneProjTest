@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <http:listener-config name="captstoneprojectmgmt-httpListenerConfig" host="0.0.0.0" port="8082" doc:name="HTTP Listener Configuration"/>
+    <apikit:config name="captstoneprojectmgmt-config" raml="captstoneprojectmgmt.raml" consoleEnabled="false" doc:name="Router"/>
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8083" doc:name="HTTP Listener Configuration"/>
+    <ws:consumer-config name="Web_Service_Consumer" wsdlLocation=" http://dev.icraftsoft.net:5858/ws/users.wsdl" service="UserPortService" port="UserPortSoap11" serviceAddress="http://dev.icraftsoft.net:5858/ws" doc:name="Web Service Consumer"/>
+    <flow name="captstoneprojectmgmt-main">
+        <http:listener config-ref="captstoneprojectmgmt-httpListenerConfig" path="/api/*" doc:name="HTTP"/>
+        <apikit:router config-ref="captstoneprojectmgmt-config" doc:name="APIkit Router"/>
+        <exception-strategy ref="captstoneprojectmgmt-apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy"/>
+    </flow>
+    <flow name="captstoneprojectmgmt-console">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/console/*" doc:name="HTTP"/>
+        <apikit:console config-ref="captstoneprojectmgmt-config" doc:name="APIkit Console"/>
+    </flow>
+    <flow name="put:/Users/{ID}:captstoneprojectmgmt-config">
+        <set-variable variableName="updatingUser" value="#[message.inboundProperties.'http.uri.params'.id]" doc:name="Variable"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="66f9d5ed-8475-466f-918d-95ffe512a0cf">
+            <dw:input-payload mimeType="application/json"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.craftsoftware.com/users
+---
+{
+	ns0#UpdateUserRequest: {
+		ns0#User: {
+			ns0#id: payload.id,
+			ns0#fist: payload.first,
+			ns0#last: payload.last,
+			ns0#department: payload.department
+		}
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer" operation="UpdateUser" doc:name="Web Service Consumer"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="5b07d595-bbb5-47fb-bda2-c4a4d64938b8">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	id: flowVars.ID as :number
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <set-payload value="{&quot;id&quot;:41,&quot;first&quot;:&quot;Garuma&quot;,&quot;last&quot;:&quot;Gech&quot;,&quot;department&quot;:&quot;socio&quot;}
+Seccessfully Updated !!!" mimeType="application/json" doc:name="Set Payload"/>
+
+    </flow>
+    <flow name="delete:/Users/{ID}:captstoneprojectmgmt-config">
+        <set-variable variableName="DeletingByID" value="#[message.inboundProperties.'http.uri.params'.id]" doc:name="Variable"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="3363cb76-3209-4ac2-bbcf-28da34524b19">
+            <dw:input-payload mimeType="application/json"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.craftsoftware.com/users
+---
+{
+	ns0#DeleteUserRequest: {
+		ns0#id: payload.id
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer" operation="DeleteUser" doc:name="Web Service Consumer"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="2d6888b7-9e0d-44d1-8bd1-496a4938b8d6">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	id: flowVars.ID as :number
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <set-payload value="{&quot;id&quot;:50,&quot;first&quot;:&quot;Ashenafi&quot;,&quot;last&quot;:&quot;Abera&quot;,&quot;department&quot;:&quot;MuleSoft&quot;}
+Successfully Deleted!" doc:name="Set Payload" mimeType="application/json"/>
+    </flow>
+    <flow name="get:/Users:captstoneprojectmgmt-config">
+        <dw:transform-message doc:name="Transform Message" metadata:id="3e5b5f6d-b06f-4796-bda5-88523c4ee808">
+            <dw:input-payload mimeType="application/json"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.craftsoftware.com/users
+---
+{
+	ns0#GetAllUsersRequest: inboundProperties."http.uri.params"
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer" operation="GetAllUsers" doc:name="Web Service Consumer"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="effbec9d-124a-49d5-95ab-14fa58bcceae">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://www.craftsoftware.com/users
+---
+{
+	id: payload.ns0#GetUserResponse.ns0#User.ns0#id,
+	first: payload.ns0#GetUserResponse.ns0#User.ns0#fist,
+	last: payload.ns0#GetUserResponse.ns0#User.ns0#last,
+	department: payload.ns0#GetUserResponse.ns0#User.ns0#department
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <set-payload value="[{&quot;id&quot;:50,&quot;first&quot;:&quot;Ashenafi&quot;,&quot;last&quot;:&quot;Abera&quot;,&quot;department&quot;:&quot;MuleSoft&quot;},{&quot;id&quot;:52,&quot;first&quot;:&quot;Capstone Project&quot;,&quot;last&quot;:&quot;Group&quot;,&quot;department&quot;:&quot;Mule&quot;}]
+All Users are fetched successfully!!" doc:name="Set Payload" mimeType="application/json"/>
+    </flow>
+    <flow name="get:/Users/{ID}:captstoneprojectmgmt-config">
+        <set-variable variableName="GetUserByID" value="#[message.inboundProperties.'http.uri.params'.id]" doc:name="Variable"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="d8d4729d-1737-4df7-886b-71a454d446ac">
+            <dw:input-payload mimeType="application/json"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.craftsoftware.com/users
+---
+{
+	ns0#GetUserRequest: {
+		ns0#id: payload.id
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer" operation="GetUser" doc:name="Web Service Consumer"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="78288c07-7c2e-4921-bfa5-517cf038b6be">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://www.craftsoftware.com/users
+---
+{
+	id: payload.ns0#GetUserResponse.ns0#User.ns0#id,
+	first: payload.ns0#GetUserResponse.ns0#User.ns0#fist,
+	last: payload.ns0#GetUserResponse.ns0#User.ns0#last,
+	department: payload.ns0#GetUserResponse.ns0#User.ns0#department
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <set-payload value="{&quot;id&quot;:4, &quot;first&quot;:&quot;qawwee&quot;, &quot;last&quot;:&quot;boss&quot;, &quot;department&quot;:&quot;science&quot;}
+User is Seccessfully fetched!!!" doc:name="Set Payload" mimeType="application/json"/>
+    </flow>
+    <flow name="post:/Users:captstoneprojectmgmt-config">
+        <dw:transform-message doc:name="Transform Message" metadata:id="c6821bbb-70ab-4f04-80a9-a368aa9b4d00">
+            <dw:input-payload mimeType="application/json"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.craftsoftware.com/users
+---
+{
+	ns0#CreateUserRequest: {
+		ns0#CreateUser: {
+			ns0#fist: payload.first,
+			ns0#last: payload.last,
+			ns0#department: payload.department
+		}
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer" operation="CreateUser" doc:name="Web Service Consumer"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="51a38f77-2975-4bd0-8352-79b6c9756e9b">
+            <dw:input-payload mimeType="application/xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://www.craftsoftware.com/users
+---
+{
+	first: payload.ns0#CreateUserRequest.ns0#CreateUser.ns0#fist,
+	last: payload.ns0#CreateUserRequest.ns0#CreateUser.ns0#last,
+	department: payload.ns0#CreateUserRequest.ns0#CreateUser.ns0#department
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <set-payload value="{&quot;id&quot;:100,&quot;first&quot;:&quot;faulos&quot;,&quot;last&quot;:&quot;shit&quot;,&quot;department&quot;:&quot;biology&quot;}
+Created!" doc:name="Set Payload" mimeType="application/json"/>
+    </flow>
+    <apikit:mapping-exception-strategy name="captstoneprojectmgmt-apiKitGlobalExceptionMapping">
+        <apikit:mapping statusCode="404">
+            <apikit:exception value="org.mule.module.apikit.exception.NotFoundException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Resource not found&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+        <apikit:mapping statusCode="405">
+            <apikit:exception value="org.mule.module.apikit.exception.MethodNotAllowedException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Method not allowed&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+        <apikit:mapping statusCode="415">
+            <apikit:exception value="org.mule.module.apikit.exception.UnsupportedMediaTypeException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Unsupported media type&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+        <apikit:mapping statusCode="406">
+            <apikit:exception value="org.mule.module.apikit.exception.NotAcceptableException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Not acceptable&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+        <apikit:mapping statusCode="400">
+            <apikit:exception value="org.mule.module.apikit.exception.BadRequestException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Bad request&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+    </apikit:mapping-exception-strategy>
+</mule>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+    <munit:config name="munit" doc:name="MUnit configuration"/>
+    <spring:beans>
+        <spring:import resource="classpath:capstoneproj.xml"/>
+        <spring:import resource="classpath:captstoneprojectmgmt.xml"/>
+    </spring:beans>
+    <munit:test name="new-test-suite-captstoneprojectmgmt-mainTest" description="Test">
+        <flow-ref name="captstoneprojectmgmt-main" doc:name="Flow-ref to captstoneprojectmgmt-main"/>
+    </munit:test>
+    <munit:test name="new-test-suite-captstoneprojectmgmt-consoleTest" description="Test">
+        <flow-ref name="captstoneprojectmgmt-console" doc:name="Flow-ref to captstoneprojectmgmt-console"/>
+    </munit:test>
+    <munit:test name="new-test-suite-put:/Users/{ID}:captstoneprojectmgmt-configTest" description="Test">
+        <flow-ref name="put:/Users/{ID}:captstoneprojectmgmt-config" doc:name="Flow-ref to put:/Users/{ID}:captstoneprojectmgmt-config"/>
+    </munit:test>
+    <munit:test name="new-test-suite-delete:/Users/{ID}:captstoneprojectmgmt-configTest" description="Test">
+        <flow-ref name="delete:/Users/{ID}:captstoneprojectmgmt-config" doc:name="Flow-ref to delete:/Users/{ID}:captstoneprojectmgmt-config"/>
+    </munit:test>
+    <munit:test name="new-test-suite-get:/Users:captstoneprojectmgmt-configTest" description="Test">
+        <flow-ref name="get:/Users:captstoneprojectmgmt-config" doc:name="Flow-ref to get:/Users:captstoneprojectmgmt-config"/>
+    </munit:test>
+    <munit:test name="new-test-suite-get:/Users/{ID}:captstoneprojectmgmt-configTest" description="Test">
+        <flow-ref name="get:/Users/{ID}:captstoneprojectmgmt-config" doc:name="Flow-ref to get:/Users/{ID}:captstoneprojectmgmt-config"/>
+    </munit:test>
+    <munit:test name="new-test-suite-post:/Users:captstoneprojectmgmt-configTest" description="Test">
+        <flow-ref name="post:/Users:captstoneprojectmgmt-config" doc:name="Flow-ref to post:/Users:captstoneprojectmgmt-config"/>
+    </munit:test>
+</mule>

@@ -1,0 +1,17 @@
+{
+    "inputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "#_custom_mule_metadata_type_#",
+            "typeId": "update"
+        },
+        "flowVariables": {
+            "UserUpdate": {
+                "connectorName": "#_custom_mule_metadata_type_#",
+                "typeId": "update"
+            }
+        }
+    },
+    "outputMessageMetadata": {},
+    "id": "0b9fc85e-68f6-4fb2-b2ea-5f92e2ab9d93",
+    "version": "5.2.0.0"
+}
